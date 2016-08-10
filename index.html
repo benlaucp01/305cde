@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, maximum-scale=1.0, minimum-scale=1.0, initial-scale=1" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="css\jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="css\bensetting.css" />
+	<script type='text/javascript' src="js\jquery-2.2.4.min.js"></script>
+	<script type='text/javascript' src="js\jquery.mobile-1.4.5.min.js"></script>
+	<script type='text/javascript' src="js\webapp.js"></script>
+	<link rel="stylesheet" href="css/themes/benstyle.css" />
+    <link rel="stylesheet" href="css/themes/benstyle.min.css" />
+    <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+	
+	<script> 
+
+	//------------------------------------check localStorage function -------------------------
+$(document).on("pageinit", function() {
+	console.log("pageinit");
+	if(isMember()) {
+		$("#liForum").show();
+		showLoginUser();
+	} else {
+		$("#liForum").hide();
+		showHomeHeader();
+	}
+   
+});
+	
+	
+	   $(document).ready(function() {	   
+		   if (localStorage.logname == undefined){		   
+				
+				if(isMember()) {
+					$("#liForum").show();
+					showLoginUser();
+				} else {
+					$("#liForum").hide();
+					showHomeHeader();
+				}
+		   }
+		   else {
+			   $('#logout').show();
+		   }	   
+		   
+		
+	//------------------------------------login function--------------------------------------	
+		$("#loginbtn").click(function() {
+			var username=$("#loginname").val();
+			var pass1=$("#loginpassword").val();
+
+		var myData = {"uname" : username, "pword": pass1};
+		
+		$.ajax({
+			url: host + 'api/Login.php',
+			type:"GET",
+			dataType : 'json',
+			data:myData,
+			success: function(msg, status){
+				if(status=="success") {
+					if(msg.length==1) {
+						console.log("success login:"+username);
+						localStorage.setItem("logname",username);
+						showLoginUser();
+						$("#liForum").show();
+					} else {
+						alert("login failed");
+					}
+				} else {
+					alert("login failed");
+				}
+			},
+			error:function(xhr, ajaxOptions, thrownError){
+				alert(xhr.status);
+				alert(thrownError);
+				 }
+			});
+		});
+	});	
+	</script>
+</head>
+<body>
+
+<!-------------------------------------Page ------------------------------------->
+<div data-role="page" id="home" data-theme="a">
+
+<!-------------------------------------Header ----------------------------------->
+	<div data-role="header" data-position="fixed">
+	  <h1><div id="logstatus"></div></h1>
+	 <!-- <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a> -->
+	  <a href="#add-form" data-icon="user" data-iconpos="notext">Add</a>
+      <a href="#logout" data-icon="power" data-iconpos="notext" id="logout" onclick="logout()" >Logout</a>
+	</div>
+<!-------------------------------------Content ---------------------------------->
+		
+        <div data-role="main" class="ui-content">
+		<div><img id="imgMain" src="images/home_bg.png " width="100%" height="auto"></div> 
+        
+			<div data-role="content">
+				<ul data-role="listview" data-theme="b">
+					<li><a href="aboutus.html" data-ajax="false">About us</a></li>
+					<li><a href="druginfo.html" data-ajax="false">Drug Abuse</a></li>
+                    <li><a href="AbuseSignal.html" data-ajax="false">Abuse Signal</a></li>
+					<li id="liForum"><a href="forum.html" data-ajax="false">Forum</a></li>
+					<li><a href="contactpage.html" data-ajax="false">Contact us</a></li>
+				</ul>
+			</div>
+	
+     			
+
+<!-------------------------------------Panel ---------------------------------->		
+	<div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" id="add-form">
+		<h2>Login</h2>
+			<label for="name">Username:</label>
+			<input type="text" name="name" id="loginname" value="" data-clear-btn="true" data-mini="true" placeholder="Enter Username">
+			<label for="password">Password:</label>
+			<input type="password" name="password" id="loginpassword" value="" data-clear-btn="true" autocomplete="off" data-mini="true" placeholder="Enter Password">
+		<div class="ui-grid-a">
+			<div class="ui-block-a"><a href="regpage.html"  data-ajax="false" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini" >Register</a></div>
+			<div class="ui-block-b"><a data-rel="close" data-ajax="false" id="loginbtn" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Login</a></div><br>
+		</div>
+	</div>
+    
+
+</div>
+<!-------------------------------------Footer ---------------------------------->   
+	<div data-role="footer" data-position="fixed">
+	 <h4>copyright@2016 Healer group</h4>
+	</div>
+
+<div data-role="page" data-rel="dialog"  id="loginSuccess" data-theme="a" data-transition="popup">
+	<div data-role="content">
+		<h1>Login Success</h1>
+	</div>
+</div>
+</body>
+</html>

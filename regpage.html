@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css\jquery.mobile-1.4.5.min.css">
+<script type='text/javascript' src="js\jquery-2.2.4.min.js"></script>
+<script type='text/javascript' src="js\jquery.mobile-1.4.5.min.js"></script>
+<script type='text/javascript' src="js\webapp.js"></script>
+<script>
+
+
+$(document).ready(function() {
+	
+$("#submit").click(function() {
+    var username=$("#regname").val();
+    var pass1=$("#regpassword").val();
+    var pass2=$("#cregpassword").val();
+
+	
+	if(pass1==pass2){
+	}else{
+		alert("password doesn't match");
+	    return;	
+	}
+	
+	alert("username"+username+"\npass:"+pass1);
+    //var myData = 'username='+username+'&pass='+pass1+"&email="+email;
+	var myData = { "uname" : username, "pword" : pass1 };	
+
+        $.ajax({
+  		  	 url: host+'api/Register.php',
+  			   type:"POST",
+           dataType : 'json',
+  			   data:myData,
+        success: function(msg, status){
+    				console.log("status:"+status+"\nmsg:"+JSON.stringify(msg));
+					if(JSON.stringify(msg)=="true") {
+						alert("register success");
+						
+						
+						$(location).attr("href","index.html");
+					} else {
+						alert("register failed");
+					}
+                },
+                 error:function(xhr, ajaxOptions, thrownError){
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                 }
+            });
+   
+});	
+
+$("input").blur(function() {
+		//alert($(this)[0].id);
+		//alert("here");
+		var sVal = $(this).val();
+		//alert($(this)[0].id+"\nval:"+sVal);
+		var sMsg = "";
+		switch($(this)[0].id) {
+			case "regname":
+				if(sVal.trim()==="") {
+					sMsg = "Username is required";
+				} else {
+					sMsg = checkDuplicateName(sVal);
+				}				
+				break;
+			case "regpassword":
+				if(sVal.trim()==="") {
+					sMsg = "Password is required";
+				}
+				break;
+			case "cregpassword":
+				if(sVal.trim()==="") {
+					sMsg = "Verify password is required";
+				} else if(sVal != $("#regpassword").val()) {
+					sMsg = "Verify password should the same";
+				}
+				break;
+		}
+		$("#warningmsg").text("");
+		//alert(sMsg);
+		if(sMsg!="") { $("#warningmsg").text(sMsg); } 
+	});
+	
+	function checkDuplicateName(regname) {
+		
+	
+		var _URL = host + "api/funcDBi.php";
+		var _method = "GET";
+		var _dataType = "json";
+		var _sql = "select login from memberlist where login ='" + regname + "'";
+		var _data = { "sql" : _sql };
+		
+		//alert(JSON.stringify(_data));
+		$.ajax({
+			url: _URL,
+			type: _method,
+			data: _data,
+			dataType: _dataType,
+			success: function(objJSON) {
+				//alert(JSON.stringify(objJSON));
+				//$("#lblMsg").text(JSON.stringify(objJSON));
+				//alert(objJSON.length);
+				if(objJSON.length > 0) {
+					$("#warningmsg").text("Username already exists");
+				}
+			}
+		});
+		
+	} 
+});
+
+
+
+</script>
+</head> 
+<body> 
+
+<div data-role="page" >
+	<h2>Registration</h2>
+	<label for="name">Username:</label>
+		<input type="text" name="name" id="regname" value="" data-clear-btn="true" data-mini="true" placeholder="Enter Username">
+		<label for="password">Password:</label>
+		<input type="password" name="password" id="regpassword" value="" data-clear-btn="true" 	autocomplete="off" data-mini="true" placeholder="Enter Password">
+        <label for="password">Re-enter Password:</label>
+		<input type="password" name="password" id="cregpassword" value="" data-clear-btn="true" 	autocomplete="off" data-mini="true" placeholder="Enter Password">
+<div class="ui-grid-a">
+<a href="#" id="submit" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Register</a><br>
+<label id="warningmsg" style="color:red;"></label>
+    
+</div>
+</div>
+</body>
+</html>

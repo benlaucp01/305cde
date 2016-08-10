@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css\jquery.mobile-1.4.5.min.css">
+<script type="text/javascript" src="js\jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="js\jquery.mobile-1.4.5.min.js"></script>
+<script type='text/javascript' src="js\webapp.js"></script>
+	<link rel="stylesheet" href="css/themes/benstyle.css" />
+    <link rel="stylesheet" href="css/themes/benstyle.min.css" />
+    <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+
+<script>	
+
+function checkMember(){
+    if (localStorage.logname != undefined) { 
+        }
+        else{
+            window.location.href="index.html";
+        }
+}
+
+//------------------------------------Get forum message function -------------------------
+
+$(document).ready(function() {
+	refreshPage();
+	
+	//------------------------------------Post forum message function -------------------------
+	$("#uploadmsg").click(function() {
+		var username=localStorage.getItem("logname");
+		var title=$("#msgtitle").val();
+		var content=$("#msgcontent").val();
+		
+		if(username!=null){
+			} else {
+				alert("Please Login before leave messenge!");
+				return;	
+			}	
+			
+		var myData = {"uname" : username, "title" : title, "content" :content};	
+		console.log("host:"+host+"::mydata:"+JSON.stringify(myData));
+			$.ajax({
+				url: host + 'api/upload.php',
+				type:"POST",
+				dataType: 'json',
+				data: myData,
+				success: function(msg, status){
+				console.log("status:"+status+"\nmsg:"+JSON.stringify(msg));
+					if(JSON.stringify(msg)=="true") {
+						alert("upload success");
+						$(location).attr("href","forum.html");
+					} else {
+						alert("upload failed");
+					}
+				},
+				 error:function(xhr, ajaxOptions, thrownError){
+					console.log("thrownError:"+thrownError);
+				 }
+			});
+	});		
+
+
+	$("#updatemsg").click(function() {
+	var msgid=$("#editmsgid").val();
+	var newtitle=$("#edtTitle").val();
+	var newcontent=$("#edtContent").val();
+
+	var myData = { "msg_id" : msgid,"newtitle" : newtitle, "newcontent": newcontent };
+	console.log("host:"+host+"::mydata:"+JSON.stringify(myData));
+		$.ajax({
+			url:host + 'api/editcomment.php',
+			type:"PUT",
+			data: myData,
+			dataType: 'json',
+			success: function(msg){
+				console.log("update:"+JSON.stringify(msg));
+				if (msg == 'updated')
+				{
+					$.mobile.changePage("#");
+					refreshPage();
+				}
+				else
+				{
+					alert(msg);
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError){
+					
+					console.log("update error:"+thrownError);
+			}
+			});
+	});	
+});
+
+function refreshPage() {
+	var loginName=localStorage.getItem("logname");
+	$('#output').html("");
+	$.ajax({
+		url: host + 'api/loaddata.php',
+		dataType:'json',
+		data: null,
+		type: 'GET',
+		success: function(data){
+			var itemHTML = "";
+			$.each(data, function(i,msg){
+				itemHTML = '<li data-role="list-divider">' + msg.msg_date + '</li>' +
+					'<li>' 
+						+'<h4>' + msg.user +'</h4>' 
+						+'<p>'  + msg.title + '</p>'
+						+'<p>'  + msg.content + '</p>' 
+						+'<p class="ui-li-aside"><strong>' + msg.msg_time + '</strong></p>' +
+					'</li>'
+				if(loginName==msg.user) {
+					itemHTML = '<li data-role="list-divider">' + msg.msg_date + '</li>' +
+					'<li>' 
+						+'<h4>' + msg.user +'</h4>' 
+						+'<p id="t_'+msg.msgid+'">'  + msg.title + '</p>'
+						+'<p id="c_'+msg.msgid+'">'  + msg.content + '</p>'
+						+'<p class="ui-li-aside"><strong>' + msg.msg_time + '</strong></p>' 
+						+'<button onclick="editMsg('+msg.msgid+')">Edit</button>'
+						+'<button onclick="DelMsg('+msg.msgid+')">Delete</button>' +
+					'</li>'					
+				}
+				console.log("itemHTML:"+itemHTML);
+				$('#output').append(itemHTML);
+					
+					});
+			$('#output').listview('refresh');
+			}
+	});
+}
+
+//------------------------------------Put forum message function -------------------------
+function editMsg(reviewId) {
+	var sMsgID = reviewId;
+	var sTitleID = "#t_"+reviewId;
+	var sContentID = "#c_"+reviewId;
+	var sTitle = $(sTitleID).html();
+	var sContent = $(sContentID).html();
+	console.log("recid:"+reviewId+"::title:"+sTitle+"::Content:"+sContent);
+	$("#edtTitle").val(sTitle);
+	$("#edtContent").val(sContent);
+	$("#editmsgid").val(sMsgID);
+	$.mobile.changePage("#editForum");
+}
+
+//------------------------------------DELETE forum message function -------------------------
+function DelMsg(reviewId) {
+
+	var myData = { "review_id" : reviewId };
+	
+	$.ajax({
+		url: host+"api/deletecomment.php",
+		type: "DELETE",
+		dataType: "json",
+		data: myData,
+		success: function(msg) {
+			console.log("msg:"+JSON.stringify(msg));
+			console.log("msg=delete::"+(msg=="deleted"));
+			if (msg == "deleted")
+			{				
+				alert("Message deleted");
+			}
+			else
+			{
+				alert("Not allow delete method");
+			}
+			refreshPage();
+		},
+		error: function(xhr, ajaxOptions, thrownError){
+			console.log("Not allow delete status:" + xhr.status)
+			console.log("Not allow delete error message:" + thrownError);
+		}
+	});
+	
+}
+
+</script>
+
+<title>Forum</title>
+</head>
+
+<!-------------------------------------Page Header------------------------------------->
+	<body >
+		<div data-role="page" id="forum" data-position="fixed" data-title="Forum">
+			<div data-role="header" data-position="fixed">
+				<h1>Forum</h1>
+					<a href="index.html"  id="page1back" data-icon="back" data-ajax="false" data-iconpos="notext">back</a>
+					<a href="#logout" data-icon="power" data-iconpos="notext"  data-ajax="false" id="logout" onclick="logout()" >Logout</a>     
+			</div>
+			
+<!-------------------------------------post Message---------------------------------->
+			<div>
+				<p>Post a Message</p>
+					<label for="m_title" >Title:</label>
+					<textarea name="m_title" id="msgtitle" value="" placeholder="write your title"></textarea>
+					<label for="m_content" >Content:</label>
+					<textarea name="m_content" id="msgcontent" value="" placeholder="leave your comment here"></textarea>
+					<input type="submit" id="uploadmsg" class="ui-btn ui-shadow" value="Submit" />
+				
+
+<!-------------------------------------Message Content --------------------------------->
+				<div>
+					<ul id="output" data-ajax="false" data-role="listview" data-inset="true" data-theme="b"></ul>
+				</div>
+				 
+<!-------------------------------------Page Footer ------------------------------------->
+				<div data-role="footer" data-position="fixed">
+					<h4>copyright@2016 Healer group</h4>
+				</div>
+			</div>
+		</div>
+<!-------------------------------------Update message form------------------------------------->		
+		<div data-role="page" id="editForum" data-title="Forum">
+			<div data-role="header" data-position="fixed">
+				<h1>Edit Forum</h1>
+				<a href="#" data-rel="back" data-icon="arrow-l" data-iconpos="notext">back</a>
+			</div>
+			<div data-role="content">
+				<div class="ui-hidden-accessible"> 
+					<label for="m_msgid" >Msg_id:</label>
+					<text name="m_msgid" id="editmsgid" value="" placeholder="msg_id"></text>
+				</div>
+				<label for="m_title" >Title:</label>
+				<textarea name="m_title" id="edtTitle" value="" placeholder="write your title"></textarea>
+				<label for="m_content" >Content:</label>
+				<textarea name="m_content" id="edtContent" value="" placeholder="leave your comment here"></textarea>
+				<input type="submit" id="updatemsg" class="ui-btn ui-shadow" value="Update" />
+			</div>
+		</div>
+	</body>
+</html>

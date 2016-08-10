@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css\jquery.mobile-1.4.5.min.css">
+<link rel="stylesheet" href="css\bensetting.css" />
+<script type="text/javascript" src="js\jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="js\jquery.mobile-1.4.5.min.js"></script>
+<script type='text/javascript' src="js\webapp.js"></script>
+<script>
+
+
+
+$(document).ready(function() {
+
+$("#updatecomment").on('click',function() {
+     var username=$("#updateusername").val();
+    var title=$("#newtitle").val();
+	var content=$("#newcontent").val();
+	
+    //var myData = 'username='+username+'&oldpass='+oldpass+'&newpass='+newpass;
+	var myData = { "uname" : username, "pword" : newpass };	
+	 			
+        $.ajax({
+  		  	 url: host + 'Update_Login.php',
+  			   type:"PUT",
+           dataType : 'json',
+  			   data:myData,
+        success: function(msg, status){
+    				alert("status:"+status+"\nmsg:"+JSON.stringify(msg));
+        
+                },
+                 error:function(xhr, ajaxOptions, thrownError){
+                    alert(xhr.status);
+                    alert(thrownError);
+                 }
+            });
+   
+});
+	
+/*$("#uploadmsg").click(function() {
+    var username=localStorage.getItem("logname");
+    var title=$("#msgtitle").val();
+    var content=$("#msgcontent").val();
+
+	
+	if(username!=null){
+	}else{
+		alert("Please Login before leave messenge!");
+	    return;	
+	}
+	
+	alert("username"+username+"\ntitle:"+title+"\ncontent:");
+    //var myData = 'username='+username+'&pass='+pass1+"&email="+email;
+	var myData = { "uname" : username, "title" : title, "content" :content };	
+
+        $.ajax({
+  		  	 url:'php/upload.php',
+  			   type:"POST",
+           dataType : 'json',
+  			   data:myData,
+       success: function(msg, status){
+    				alert("status:"+status+"\nmsg:"+JSON.stringify(msg));
+					if(JSON.stringify(msg)=="true") {
+						alert("upload success");
+						
+						
+						$(location).attr("href","forum.html");
+					} else {
+						alert("upload failed");
+					}
+                },
+                 error:function(xhr, ajaxOptions, thrownError){
+                    alert(xhr.status);
+                    alert(thrownError);
+                 }
+            });
+   
+});*/	
+
+
+});
+
+</script>
+<title>Edit Comment</title>
+</head>
+
+<body >
+<div data-role="page" id="edit" data-title="Edit">
+			<div data-role="header" data-position="fixed">
+				<h1>Edit your comment</h1>
+				<a href="index.html"  id="page1back" data-icon="back" data-iconpos="notext">back</a>
+                <label><input type="button" value="logout"  id="logout" onclick="logout()"> </label>      
+			</div>
+
+
+				<div  >
+				<p>Edit Message</p>
+
+                 <label for="m_title" >Title:</label>
+				  <textarea name="m_title" id="newtitle" value="" placeholder="write your title"></textarea>
+				  <label for="m_content" >Content:</label>
+				  <textarea name="m_content" id="newcontent" value="" placeholder="leave your comment here"></textarea>
+                  <a href="#" data-ajax="false" class="submitbtn" id="updatecomment">Update</a>
+                  <p></p>
+                    <p></p>
+                  
+                  <div id="output">
+
+                  </div>
+				
+				</div>
+                <ul id="webapp_list" data-role="listview"></ul>
+		     
+
+    <div data-role="footer" data-position="fixed">
+				<div data-role="controlgroup" data-type="horizontal">
+					<a href="#contact_us" data-role="button" data-icon="search">Contact Us</a>
+                    
+				</div>
+				<h4>copyright@2016 Healer group</h4>
+    	</div>
+</div>
+
+</body>
+</html>

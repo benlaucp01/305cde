@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css\jquery.mobile-1.4.5.min.css">
+<script type="text/javascript" src="js\jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="js\jquery.mobile-1.4.5.min.js"></script>
+<script>
+
+
+$(document).ready(function() {
+	
+$("#submit").click(function() {
+    var username=$("#regname").val();
+    var pass1=$("#regpassword").val();
+    var pass2=$("#cregpassword").val();
+
+	
+	if(pass1==pass2){
+	}else{
+		alert("password doesn't match");
+	    return;	
+	}
+	
+	alert("username"+username+"\npass:"+pass1);
+    //var myData = 'username='+username+'&pass='+pass1+"&email="+email;
+	var myData = { "uname" : username, "pword" : pass1 };	
+
+        $.ajax({
+  		  	 url:'php/Register.php',
+  			   type:"POST",
+           dataType : 'json',
+  			   data:myData,
+        success: function(msg, status){
+    				alert("status:"+status+"\nmsg:"+JSON.stringify(msg));
+					if(JSON.stringify(msg)=="true") {
+						alert("register success");
+						
+						
+						$(location).attr("href","index.html");
+					} else {
+						alert("register failed");
+					}
+                },
+                 error:function(xhr, ajaxOptions, thrownError){
+                    alert(xhr.status);
+                    alert(thrownError);
+                 }
+            });
+   
+});	
+});
+$("input").blur(function() {
+		//alert($(this)[0].id);
+		//alert("here");
+		var sVal = $(this).val();
+		//alert($(this)[0].id+"\nval:"+sVal);
+		var sMsg = "";
+		switch($(this)[0].id) {
+			case "regname":
+				if(sVal.trim()==="") {
+					sMsg = "Username is required";
+				} else {
+					sMsg = checkDuplicateName(sVal);
+				}				
+				break;
+			case "regpassword":
+				if(sVal.trim()==="") {
+					sMsg = "Password is required";
+				}
+				break;
+			case "cregpassword":
+				if(sVal.trim()==="") {
+					sMsg = "Verify password is required";
+				} else if(sVal != $("#regpassword").val()) {
+					sMsg = "Verify password should the same";
+				}
+				break;
+		}
+		$("#warningmsg").text("");
+		//alert(sMsg);
+		if(sMsg!="") { $("#warningmsg").text(sMsg); } 
+	});
+	
+	function checkDuplicateName(regname) {
+		
+	
+		var _URL = "php/funcDBi.php";
+		var _method = "GET";
+		var _dataType = "json";
+		var _sql = "select login from memberlist where login ='" + regname + "'";
+		var _data = { "sql" : _sql };
+		
+		//alert(JSON.stringify(_data));
+		$.ajax({
+			url: _URL,
+			type: _method,
+			data: _data,
+			dataType: _dataType,
+			success: function(objJSON) {
+				//alert(JSON.stringify(objJSON));
+				//$("#lblMsg").text(JSON.stringify(objJSON));
+				//alert(objJSON.length);
+				if(objJSON.length > 0) {
+					$("#warningmsg").text("Username already exists");
+				}
+			}
+		});
+		
+	} 
+	
+});	
+
+
+</script>
+</head>
+<body>
+<div data-role="page">
+	<div data-role="header">
+		<h1>Register</h1>
+		<a href="index.html" data-icon="arrow-l" data-iconpos="notext" data-transition="flip">Back</a>
+	</div><!-- /header -->
+	<div data-role="main" class="ui-content">
+	<form id="regForm">
+	<fieldset data-role="fieldcontain">
+		<label for="uname">Username:</label>
+		<input class="required" type="text" name="uname" id="reguname" value="" data-clear-btn="true" data-mini="true" placeholder="Enter Username" focus>
+	</fieldset>
+	<fieldset data-role="fieldcontain">
+		<label for="upassword">Password:</label>
+		<input class="required" type="password" name="upassword" id="regpassword" value="" data-clear-btn="true" autocomplete="off" data-mini="true" placeholder="Enter Password">
+	</fieldset>
+	<fieldset data-role="fieldcontain">
+		<label for="vpassword">Re-Type Password:</label>
+		<input class="required" type="password" name="vpassword" id="cregpassword" value="" data-clear-btn="true" autocomplete="off" data-mini="true" placeholder="Re-Type Password">	
+	</fieldset>
+	<div class="ui-grid-a">
+		<!--<div class="ui-block-a"></div>
+		<div class="ui-block-b"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Register</a></div>
+		<input type="submit" value="Register">-->
+		<button id="btnRegister" >Register</button>
+		<label id="lblMsg" style="color:red;"></label>
+	</div>
+	</form>
+	</div><!-- /content -->
+	<!--<div data-role="footer">
+		<h1>Footer Text</h1>
+	</div>--><!-- /footer -->
+</div>
+<div data-role="page" id="success" data-theme="b">
+    <div data-role="header">
+        <h2>Thank You !!!</h2>
+    </div>
+</div>
+</body>
+</html>
